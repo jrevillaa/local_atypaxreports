@@ -74,8 +74,6 @@ class local_atypaxreports_external extends external_api {
 
             array_push($returnValue, $return);
         }
-//
-
         return $returnValue;
     }
 
