@@ -16,13 +16,13 @@
 
 /**
  * Web service template plugin related strings
- * @package   localwspeoplesoft
+ * @package   localatypaxreports
  * @copyright 2011 Moodle Pty Ltd (http://moodle.com)
  * @author    Jerome Mouneyrac
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Web service PelopleSoft';
+$string['pluginname'] = 'Reports ATYPAX';
 $string['name'] = 'Web Service Tools';
 $string['insertpathcourse'] = 'Insert XML server path';
 $string['insertpathuser'] = 'Insert XML Users path';

@@ -22,9 +22,9 @@ class PrepareData
         $users;
         $members;
 
-        $permission_read= $DB->get_record('config',array('name'=>'wspeoplesoftcourseenable'));
+        $permission_read= $DB->get_record('config',array('name'=>'atypaxreportscourseenable'));
         if($permission_read->value == 1){
-            $xml_path = $DB->get_record('config',array('name'=>'wspeoplesoftcoursepath'));
+            $xml_path = $DB->get_record('config',array('name'=>'atypaxreportscoursepath'));
             $xml = new SimpleXMLElement($me->prepare_path($xml_path->value,'COFR'), NULL, TRUE);
             
             
@@ -300,22 +300,22 @@ class PrepareData
     private function send($data,$type,$curl,$format="json"){
         global $CFG;
         global $DB;
-        $objData = $DB->get_record('config',array('name'=>'wspeoplesofttoken'));
+        $objData = $DB->get_record('config',array('name'=>'atypaxreportstoken'));
         $token = $objData->value;
         $domainname = $CFG->wwwroot;
 
         switch($type){
             case "categorie":
-                $functionname = 'local_wspeoplesoft_create_course_categorie';
+                $functionname = 'local_atypaxreports_create_course_categorie';
             break;
             case "course":
-                $functionname = 'local_wspeoplesoft_create_course';
+                $functionname = 'local_atypaxreports_create_course';
             break;
             case "user":
-                $functionname = 'local_wspeoplesoft_create_users';
+                $functionname = 'local_atypaxreports_create_users';
             break;
             case "member":
-                $functionname = 'local_wspeoplesoft_enrol_users';
+                $functionname = 'local_atypaxreports_enrol_users';
             break;
         }
         

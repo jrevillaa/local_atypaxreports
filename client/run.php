@@ -8,7 +8,7 @@ global $CFG;
 global $DB;
 
 $token = (isset($_GET['token']))?$_GET['token']:'';
-$obj = $DB->get_record('config',array('name'=>'wspeoplesofttoken'));
+$obj = $DB->get_record('config',array('name'=>'atypaxreportstoken'));
 
     if($obj->value == $token){
         $objData = new PrepareData();

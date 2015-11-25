@@ -16,13 +16,13 @@
 /**
  * External Web Service Template
  *
- * @package    localwspeoplesoft
+ * @package    localatypaxreports
  * @copyright  2011 Moodle Pty Ltd (http://moodle.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once($CFG->libdir . "/externallib.php");
 
-class local_wspeoplesoft_external extends external_api {
+class local_atypaxreports_external extends external_api {
 
     public static function grade_course_detail_parameters() {
         return new external_function_parameters(
@@ -74,7 +74,7 @@ class local_wspeoplesoft_external extends external_api {
 
             array_push($returnValue, $return);
         }
-//        
+//
 
         return $returnValue;
     }
@@ -313,7 +313,7 @@ class local_wspeoplesoft_external extends external_api {
 
         return $params['welcomemessage'] . $USER->firstname.' '.$USER->lastname;
         //return $USER;
-        
+
     }
 
     /**
@@ -541,7 +541,7 @@ class local_wspeoplesoft_external extends external_api {
                 'password' => new external_value(PARAM_TEXT, 'set password', VALUE_OPTIONAL),
                 'city' => new external_value(PARAM_RAW, 'City', VALUE_OPTIONAL),
                 'idnumber' => new external_value(PARAM_RAW, 'idnumber', VALUE_OPTIONAL),
-                'institution' => new external_value(PARAM_RAW, 'institution', VALUE_OPTIONAL),                        
+                'institution' => new external_value(PARAM_RAW, 'institution', VALUE_OPTIONAL),
                 'department' => new external_value(PARAM_RAW, 'department', VALUE_OPTIONAL)
                     )
                     )
@@ -563,7 +563,7 @@ class local_wspeoplesoft_external extends external_api {
         if (empty($enrol)) {
             throw new moodle_exception('manualpluginnotinstalled', 'enrol_manual');
         }
-        
+
         //throw new moodle_exception('El email no es correcto', 'enrol_manual');
 
             //print_r($params['enrolments']);
@@ -576,11 +576,11 @@ class local_wspeoplesoft_external extends external_api {
             if (is_object($ci)) {
                 $enrolment['courseid'] = $ci->id;
             } else {
-                
+
                 throw new moodle_exception('El identificador del curso: ' . $enrolment['courseid'] . ' no existe en Moodle', 'enrol_manual');
                 //$enrolment['courseid'] = 0;
             }
-            
+
             //reemplazamos los valores del usuario
             $u = $DB->get_record('user', array('idnumber' => $enrolment['userid']));
             if(!is_object($u)){
@@ -588,13 +588,13 @@ class local_wspeoplesoft_external extends external_api {
             }
             if (is_object($u)) {
                 $enrolment['userid'] = $u->id;
-                
+
             } else {
                     throw new invalid_parameter_exception('userId is invalid: ');
-                
+
             }
             // Ensure the current user is allowed to run this function in the enrolment context
-            
+
             $context = get_context_instance(CONTEXT_COURSE, $enrolment['courseid']);
             self::validate_context($context);
 
@@ -643,7 +643,7 @@ class local_wspeoplesoft_external extends external_api {
             //var_dump($enrolment);die();
             $enrol->enrol_user($instance, $enrolment['userid'], $enrolment['roleid'], $enrolment['timestart'], $enrolment['timeend'], $enrolment['status']);
         }
-        
+
         $transaction->allow_commit();
         //var_dump($enrolment);die();
         return 'Usuarios Matriculados';
@@ -950,7 +950,7 @@ class local_wspeoplesoft_external extends external_api {
                 )
         );
     }
-    
+
     /**
      * Returns description of method parameters
      *
@@ -1042,15 +1042,15 @@ class local_wspeoplesoft_external extends external_api {
         $availablelangs = get_string_manager()->get_list_of_translations();
 
         $transaction = $DB->start_delegated_transaction();
-        
-        
+
+
 
         foreach ($params['courses'] as $course) {
 	//print_r($course['idnumber']. '-');
             // Ensure the current user is allowed to run this function
             $tem = $DB->get_record('course_categories', array('idnumber' => $course['categoryid']));
             $context = context_coursecat::instance($tem->id, IGNORE_MISSING);
-            
+
             try {
                 self::validate_context($context);
             } catch (Exception $e) {
@@ -1078,9 +1078,9 @@ class local_wspeoplesoft_external extends external_api {
             }
 
             //force visibility if ws user doesn't have the permission to set it
-            
+
             $category = $DB->get_record('course_categories', array('idnumber' => $course['categoryid']));
-            
+
             if (!has_capability('moodle/course:visibility', $context)) {
                 $course['visible'] = $category->visible;
             }
@@ -1133,14 +1133,14 @@ class local_wspeoplesoft_external extends external_api {
             )
         );
     }
-    
-    
-    
+
+
+
     /**
      * Returns description of method parameters
      *
      * @return external_function_parameters
-     * 
+     *
      */
     public static function create_categories_parameters() {
         return new external_function_parameters(
@@ -1173,7 +1173,7 @@ class local_wspeoplesoft_external extends external_api {
      *
      * @param array $categories - see create_categories_parameters() for the array structure
      * @return array - see create_categories_returns() for the array structure
-     * 
+     *
      */
     public static function create_categories($categories) {
         global $CFG, $DB;
@@ -1189,7 +1189,7 @@ class local_wspeoplesoft_external extends external_api {
             $parentCategory = $DB->get_record('course_categories', array('idnumber' => $category['parent']));
             $category['parent'] = $parentCategory->id;
             if ($category['parent']) {
-                
+
                 if (!is_object($parentCategory)) {
                     throw new moodle_exception('unknowcategory');
                 }
@@ -1217,7 +1217,7 @@ class local_wspeoplesoft_external extends external_api {
      * Returns description of method parameters
      *
      * @return external_function_parameters
-     * 
+     *
      */
     public static function create_categories_returns() {
         return new external_multiple_structure(
@@ -1229,8 +1229,8 @@ class local_wspeoplesoft_external extends external_api {
             )
         );
     }
-    
-    
+
+
 
     /**
      * Returns description of method parameters
@@ -1621,26 +1621,26 @@ class local_wspeoplesoft_external extends external_api {
 
     public static function save_key($data) {
         global $DB, $CFG;
-            
+
         $object = new stdClass();
 
         if($data[0]['username'] != null && $data[0]['token'] != null){
             $object->username = $data[0]['username'];
             $object->token = $data[0]['token'];
             $object->date = time();
-            $temp = $DB->get_record('local_wspeoplesoft', array('username'=>$data[0]['username']));
+            $temp = $DB->get_record('local_atypaxreports', array('username'=>$data[0]['username']));
             if(is_object($temp)){
                 $temp->token = $data[0]['token'];
-                $DB->update_record('local_wspeoplesoft', $temp);
+                $DB->update_record('local_atypaxreports', $temp);
             }else{
-                
-                $DB->insert_record('local_wspeoplesoft', $object); 
+
+                $DB->insert_record('local_atypaxreports', $object);
             }
             return "successful transaction";
         }else{
             return "Error, invalid data";
         }
-        
+
     }
 
     public static function save_key_returns() {
