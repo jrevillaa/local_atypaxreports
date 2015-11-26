@@ -2,12 +2,12 @@
 
 
 require_once(dirname(dirname(dirname(dirname(__FILE__)))) . '/config.php');
-require_once('prepare_statements.php');
+//require_once('prepare_statements.php');
 
 global $CFG;
 global $DB;
 
-$token = (isset($_GET['token']))?$_GET['token']:'';
+/*$token = (isset($_GET['token']))?$_GET['token']:'';
 $obj = $DB->get_record('config',array('name'=>'atypaxreportstoken'));
 
     if($obj->value == $token){
@@ -17,9 +17,64 @@ $obj = $DB->get_record('config',array('name'=>'atypaxreportstoken'));
     }else{
         print_r('invalid token');
     }
-    
-//var_dump($CFG);
+    */
+   /*
+   SELECT mdl_course.fullname, mdl_user.username, mdl_user.firstname, mdl_user.lastname FROM mdl_course
+
+INNER JOIN mdl_context ON mdl_context.instanceid = mdl_course.id
+
+INNER JOIN mdl_role_assignments ON mdl_context.id = mdl_role_assignments.contextid
+
+INNER JOIN mdl_role ON mdl_role.id = mdl_role_assignments.roleid
+
+INNER JOIN mdl_user ON mdl_user.id = mdl_role_assignments.userid
+
+WHERE mdl_role.id = 5 AND mdl_course.id = 2
+    */
+   //Este Select te devuelve todos los usuarios de un curso en específico
+        $sql_group = "SELECT mdl_user.id, mdl_user.username, mdl_user.firstname, mdl_user.lastname, mdl_user_info_data.data, mdl_user.email, mdl_user_lastaccess.timeaccess AS tiempo_ingreso
+                  FROM mdl_course
+                  INNER JOIN mdl_context ON mdl_context.instanceid = mdl_course.id
+                  INNER JOIN mdl_role_assignments ON mdl_context.id = mdl_role_assignments.contextid
+                  INNER JOIN mdl_role ON mdl_role.id = mdl_role_assignments.roleid
+                  INNER JOIN mdl_user ON mdl_user.id = mdl_role_assignments.userid
+                  INNER JOIN mdl_user_info_data ON mdl_user_info_data.userid = mdl_role_assignments.userid
+                  LEFT JOIN mdl_user_lastaccess ON mdl_user_lastaccess.userid = mdl_user.id
+                  AND mdl_user_lastaccess.courseid = mdl_course.id
+                  WHERE mdl_role.id =5
+                  AND mdl_course.id =2";
+        $data = orderRecords($DB->get_records_sql($sql_group));
+
+        $todo = array();
+
+        $course = $DB->get_record('course',array('id'=>2),'id,fullname');
+
+        $todo = array(
+              'course'=> $course
+        );
+        $course_sections = orderRecords($DB->get_records('course_sections',array('course' => $course->id),'','id,name'));
+        $grade_item = orderRecords($DB->get_records('grade_items',array('courseid' => $course->id),'iteminstance','id,itemname'));
+
+        $todo['sections'] = $course_sections;
+        foreach ($data as $key => $value) {
+          $temp = $todo;
+          for($i=0;$i<count($course_sections);$i++) {
+            $grade = $DB->get_record('grade_grades',array('itemid'=>$grade_item[$i]->id, 'userid' => $value->id),'id,rawgrade');
+            $temp['sections'][$i]->name_item = $grade_item[$i]->itemname;
+            $temp['sections'][$i]->grade_item = $grade;
+          }
+          $value->course = $temp;
+        }
+        function orderRecords($record){
+          $temp = array();
+          foreach ($record as $key => $value) {
+            $temp[] = $value;
+          }
+          return $temp;
+        }
 
 
 
-
+echo '<pre>';
+print_r($data);
+echo '</pre>';
