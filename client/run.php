@@ -56,7 +56,7 @@ WHERE mdl_role.id = 5 AND mdl_course.id = 2
         $todo = array(
               'course'=> $course
         );
-        $course_sections = orderRecords($DB->get_records('course_sections',array('course' => $course->id),'','id,name'));
+        $course_sections = orderRecords($DB->get_records('course_sections',array('course' => $course->id),'','name'));
         $grade_item = orderRecords($DB->get_records('grade_items',array('courseid' => $course->id),'iteminstance','id,itemname'));
 
         $todo['sections'] = $course_sections;
@@ -64,13 +64,15 @@ WHERE mdl_role.id = 5 AND mdl_course.id = 2
           $grades_temp = array();
           $temp = $todo;
           for($i=0;$i<count($course_sections);$i++) {
-            $grade = $DB->get_record('grade_grades',array('itemid'=>$grade_item[$i]->id, 'userid' => $value->id),'id,rawgrade');
+            $grade = $DB->get_record('grade_grades',array('itemid'=>$grade_item[$i]->id, 'userid' => $value->id),'rawgrade');
             $temp['sections'][$i]->name_item = $grade_item[$i]->itemname;
+            $gt = (is_object($grade))?array($grade->rawgrade):"-";
             echo '<pre>';
-            print_r($grade);
+            print_r($gt);
             echo '</pre>';
-            $temp['sections'][$i]->grade_item = (isset($grade->rawgrade))?"-":$grade;
-            $grades_temp[] = (isset($grade->rawgrade))?"-":$grade;
+            //$temp['sections'][$i]->grade_item = (is_object($grade))?array($grade->rawgrade):"-";
+            $temp['sections'][$i]->grade_item = $gt;
+            $grades_temp[] = (is_object($grade))?strval($grade->rawgrade):"-";
           }
           $value->course = $temp;
           //echo '<pre>';
