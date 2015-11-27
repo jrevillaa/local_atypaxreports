@@ -66,13 +66,9 @@ WHERE mdl_role.id = 5 AND mdl_course.id = 2
           for($i=0;$i<count($course_sections);$i++) {
             $grade = $DB->get_record('grade_grades',array('itemid'=>$grade_item[$i]->id, 'userid' => $value->id),'rawgrade');
             $temp['sections'][$i]->name_item = $grade_item[$i]->itemname;
-            $gt = (is_object($grade))?array($grade->rawgrade):"-";
-            echo '<pre>';
-            print_r($gt);
-            echo '</pre>';
-            //$temp['sections'][$i]->grade_item = (is_object($grade))?array($grade->rawgrade):"-";
-            $temp['sections'][$i]->grade_item = $gt;
-            $grades_temp[] = (is_object($grade))?strval($grade->rawgrade):"-";
+
+            $temp['sections'][$i]->grade_item = (is_object($grade))?$grade->rawgrade:0;
+
           }
           $value->course = $temp;
           //echo '<pre>';
