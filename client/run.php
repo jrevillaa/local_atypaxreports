@@ -51,7 +51,7 @@ WHERE mdl_role.id = 5 AND mdl_course.id = 2
 
         $todo = array();
 
-        $course = $DB->get_record('course',array('id'=>2),'id,fullname');
+        $course = $DB->get_record('course',array('id'=>$idcourse),'id,fullname');
 
         $todo = array(
               'course'=> $course
