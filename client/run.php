@@ -51,7 +51,7 @@ WHERE mdl_role.id = 5 AND mdl_course.id = 2
 
         $todo = array();
 
-        $course = $DB->get_record('course',array('id'=>2),'id,fullname');
+        $course = $DB->get_record('course',array('id'=>$idcourse),'id,fullname');
 
         $todo = array(
               'course'=> $course
@@ -61,13 +61,26 @@ WHERE mdl_role.id = 5 AND mdl_course.id = 2
 
         $todo['sections'] = $course_sections;
         foreach ($data as $key => $value) {
+          $grades_temp = array();
           $temp = $todo;
           for($i=0;$i<count($course_sections);$i++) {
             $grade = $DB->get_record('grade_grades',array('itemid'=>$grade_item[$i]->id, 'userid' => $value->id),'id,rawgrade');
             $temp['sections'][$i]->name_item = $grade_item[$i]->itemname;
-            $temp['sections'][$i]->grade_item = $grade;
+            echo '<pre>';
+            print_r($grade);
+            echo '</pre>';
+            $temp['sections'][$i]->grade_item = (isset($grade->rawgrade))?"-":$grade;
+            $grades_temp[] = (isset($grade->rawgrade))?"-":$grade;
           }
           $value->course = $temp;
+          //echo '<pre>';
+          //print_r($grades_temp);
+          //echo '</pre>';
+          if(in_array('-',$grades_temp)){
+            $value->avance = 'En proceso';
+          }else{
+            $value->estado = 'Finalizado';
+          }
         }
         function orderRecords($record){
           $temp = array();
@@ -79,8 +92,14 @@ WHERE mdl_role.id = 5 AND mdl_course.id = 2
 
 
 
-//echo '<pre>';
-//print_r($data);
-//echo '</pre>';
-header('Content-type: text/html; charset=UTF-8');
-echo json_encode($data);
+echo '<pre>';
+/*foreach ($data as $key => $value) {
+  foreach ($value->course['sections'] as $key => $val) {
+
+    print_r($val);
+  }
+}*/
+print_r($data);
+echo '</pre>';
+//header('Content-type: text/html; charset=UTF-8');
+//echo json_encode($data);
