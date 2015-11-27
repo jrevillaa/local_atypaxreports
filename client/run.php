@@ -34,7 +34,8 @@ WHERE mdl_role.id = 5 AND mdl_course.id = 2
    //Este Select te devuelve todos los usuarios de un curso en específico
    //
 
-      echo date('Y-m-d H:i:s',1447885732);
+      //echo date('Y-m-d H:i:s',1447885732);
+      $idcourse = $_GET['idcourse'];
         $sql_group = "SELECT mdl_user.id, mdl_user.username, mdl_user.firstname, mdl_user.lastname, mdl_user_info_data.data, mdl_user.email, mdl_user_lastaccess.timeaccess AS tiempo_ingreso
                   FROM mdl_course
                   INNER JOIN mdl_context ON mdl_context.instanceid = mdl_course.id
@@ -45,7 +46,7 @@ WHERE mdl_role.id = 5 AND mdl_course.id = 2
                   LEFT JOIN mdl_user_lastaccess ON mdl_user_lastaccess.userid = mdl_user.id
                   AND mdl_user_lastaccess.courseid = mdl_course.id
                   WHERE mdl_role.id =5
-                  AND mdl_course.id =2";
+                  AND mdl_course.id =$idcourse";
         $data = orderRecords($DB->get_records_sql($sql_group));
 
         $todo = array();
@@ -78,6 +79,8 @@ WHERE mdl_role.id = 5 AND mdl_course.id = 2
 
 
 
-echo '<pre>';
-print_r($data);
-echo '</pre>';
+//echo '<pre>';
+//print_r($data);
+//echo '</pre>';
+header('Content-type: text/html; charset=UTF-8');
+echo json_encode($data);
