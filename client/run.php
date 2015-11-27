@@ -32,6 +32,9 @@ INNER JOIN mdl_user ON mdl_user.id = mdl_role_assignments.userid
 WHERE mdl_role.id = 5 AND mdl_course.id = 2
     */
    //Este Select te devuelve todos los usuarios de un curso en específico
+   //
+
+      echo date('Y-m-d H:i:s',1447885732);
         $sql_group = "SELECT mdl_user.id, mdl_user.username, mdl_user.firstname, mdl_user.lastname, mdl_user_info_data.data, mdl_user.email, mdl_user_lastaccess.timeaccess AS tiempo_ingreso
                   FROM mdl_course
                   INNER JOIN mdl_context ON mdl_context.instanceid = mdl_course.id

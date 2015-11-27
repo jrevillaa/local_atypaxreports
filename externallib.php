@@ -529,7 +529,7 @@ class local_atypaxreports_external extends external_api {
                     array(
                 'roleid' => new external_value(PARAM_INT, 'Role to assign to the user'),
                 'userid' => new external_value(PARAM_RAW, 'The id user that is going to be enrolled'),
-                'courseid' => new external_value(PARAM_TEXT, 'The course to enrol the user role in',VALIE_OPTIONAL),
+                'courseid' => new external_value(PARAM_TEXT, 'The course to enrol the user role in',VALUE_OPTIONAL),
                 'timestart' => new external_value(PARAM_INT, 'Timestamp when the enrolment start', VALUE_OPTIONAL),
                 'timeend' => new external_value(PARAM_INT, 'Timestamp when the enrolment end', VALUE_OPTIONAL),
                 'suspend' => new external_value(PARAM_INT, 'set to 1 to suspend the enrolment', VALUE_OPTIONAL),
@@ -1645,4 +1645,66 @@ class local_atypaxreports_external extends external_api {
         return new external_value(PARAM_TEXT, 'The status message - Successful or Error');
     }
 
+    public static function ucic_report_parameters() {
+        return new external_function_parameters(
+                array(
+            'key' => new external_multiple_structure(
+                    new external_single_structure(
+                        array(
+                            'username' => new external_value(PARAM_TEXT, 'Username user'),
+                            'token' => new external_value(PARAM_TEXT, 'Password key from PeopleSoft'),
+                        )
+                    )
+            )
+                )
+        );
+    }
+
+    public static function ucic_report($data){
+      $sql_group = "SELECT mdl_user.id, mdl_user.username, mdl_user.firstname, mdl_user.lastname, mdl_user_info_data.data, mdl_user.email, mdl_user_lastaccess.timeaccess AS tiempo_ingreso
+                FROM mdl_course
+                INNER JOIN mdl_context ON mdl_context.instanceid = mdl_course.id
+                INNER JOIN mdl_role_assignments ON mdl_context.id = mdl_role_assignments.contextid
+                INNER JOIN mdl_role ON mdl_role.id = mdl_role_assignments.roleid
+                INNER JOIN mdl_user ON mdl_user.id = mdl_role_assignments.userid
+                INNER JOIN mdl_user_info_data ON mdl_user_info_data.userid = mdl_role_assignments.userid
+                LEFT JOIN mdl_user_lastaccess ON mdl_user_lastaccess.userid = mdl_user.id
+                AND mdl_user_lastaccess.courseid = mdl_course.id
+                WHERE mdl_role.id =5
+                AND mdl_course.id =2";
+      $data = $this->orderRecords($DB->get_records_sql($sql_group));
+
+      $todo = array();
+
+      $course = $DB->get_record('course',array('id'=>2),'id,fullname');
+
+      $todo = array(
+            'course'=> $course
+      );
+      $course_sections = orderRecords($DB->get_records('course_sections',array('course' => $course->id),'','id,name'));
+      $grade_item = $this->orderRecords($DB->get_records('grade_items',array('courseid' => $course->id),'iteminstance','id,itemname'));
+
+      $todo['sections'] = $course_sections;
+      foreach ($data as $key => $value) {
+        $temp = $todo;
+        for($i=0;$i<count($course_sections);$i++) {
+          $grade = $DB->get_record('grade_grades',array('itemid'=>$grade_item[$i]->id, 'userid' => $value->id),'id,rawgrade');
+          $temp['sections'][$i]->name_item = $grade_item[$i]->itemname;
+          $temp['sections'][$i]->grade_item = $grade;
+        }
+        $value->course = $temp;
+      }
+    }
+
+    public static function ucic_report_returns() {
+        return new external_value(PARAM_TEXT, 'The status message - Successful or Error');
+    }
+
+    function orderRecords($record){
+      $temp = array();
+      foreach ($record as $key => $value) {
+        $temp[] = $value;
+      }
+      return $temp;
+    }
 }

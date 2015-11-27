@@ -70,7 +70,7 @@ $functions = array(
     'local_atypaxreports_get_courses' => array(
         'classname' => 'local_atypaxreports_external',
         'methodname' => 'get_courses',
-        'classpath' => 'local/atypaxreports/externallib.php',        
+        'classpath' => 'local/atypaxreports/externallib.php',
         'description' => 'Return course details',
         'type'        => 'read',
         'capabilities'=> 'moodle/course:view,moodle/course:update,moodle/course:viewhiddencourses',
@@ -78,15 +78,15 @@ $functions = array(
     'local_atypaxreports_create_course_categorie' => array(
         'classname' => 'local_atypaxreports_external',
         'methodname' => 'create_categories',
-        'classpath' => 'local/atypaxreports/externallib.php',        
+        'classpath' => 'local/atypaxreports/externallib.php',
         'description' => 'Create course category',
         'type'        => 'write',
         'capabilities'=> 'moodle/category:manage',
-    ),    
+    ),
     'local_atypaxreports_get_users_by_id' => array(
         'classname' => 'local_atypaxreports_external',
         'methodname' => 'get_users_by_id',
-        'classpath' => 'local/atypaxreports/externallib.php',        
+        'classpath' => 'local/atypaxreports/externallib.php',
         'description' => 'Get users by id.',
         'type'        => 'read',
         'capabilities'=> 'moodle/user:viewdetails, moodle/user:viewhiddendetails, moodle/course:useremail, moodle/user:update',
@@ -98,7 +98,7 @@ $functions = array(
         'description' => 'Return category details',
         'type'        => 'read',
         'capabilities'=> 'moodle/category:viewhiddencategories',
-    ),    
+    ),
     'local_atypaxreports_course_config' => array(
         'classname'   => 'local_atypaxreports_external',
         'methodname'  => 'course_config',
@@ -129,19 +129,26 @@ $functions = array(
         'description' => 'Creates new groups.',
         'type'        => 'write',
         'capabilities'=> 'moodle/course:managegroups',
-    ),    
+    ),
     'local_atypaxreports_save_key' => array(
         'classname'   => 'local_atypaxreports_external',
         'methodname'  => 'save_key',
         'classpath'   => 'local/atypaxreports/externallib.php',
         'description' => 'Update token.',
         'type'        => 'write',
-    ),   
+    ),
+    'local_atypaxreports_ucic_report' => array(
+        'classname'   => 'local_atypaxreports_external',
+        'methodname'  => 'ucic_report',
+        'classpath'   => 'local/atypaxreports/externallib.php',
+        'description' => 'Send report for ucic.',
+        'type'        => 'read',
+    ),
 );
 
 // We define the services to install as pre-build services. A pre-build service is not editable by administrator.
 $services = array(
-    'People Soft WebService' => array(
+    'Atypax Reports WebService' => array(
         'functions' => array('local_atypaxreports_hello_world',
             'local_atypaxreports_create_course',
             'local_atypaxreports_create_users',
@@ -156,7 +163,8 @@ $services = array(
             'local_atypaxreports_core_group_get_course_groups',
             'local_atypaxreports_core_group_add_group_members',
             'local_atypaxreports_core_group_create_groups',
-            'local_atypaxreports_save_key',),
+            'local_atypaxreports_save_key',
+            'local_atypaxreports_ucic_report',),
         'restrictedusers' => 0,
         'enabled' => 1,
     )
