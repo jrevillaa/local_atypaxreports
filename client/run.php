@@ -36,7 +36,7 @@ global $DB;
         //$todo['sections'] = $course_sections;
         foreach ($data as $key => $value) {
           $grades_temp = array();
-        $course_sections = orderRecords($DB->get_records('course_sections',array('course' => $course->id),'','name'));
+        $course_sections = orderRecords($DB->get_records('course_sections',array('course' => $course->id),'','id,name'));
           /*echo '<pre>';
           print_r($todo);
           echo '</pre>';*/
@@ -45,7 +45,7 @@ global $DB;
               'sections' => $course_sections,
           );
           for($i=0;$i<count($course_sections);$i++) {
-            $grade = $DB->get_record('grade_grades',array('itemid'=>$grade_item[$i]->id, 'userid' => $value->id),'rawgrade');
+            $grade = $DB->get_record('grade_grades',array('itemid'=>$grade_item[$i]->id, 'userid' => $value->id),'id,rawgrade');
             $grades_temp[] = (is_object($grade)) ? $grade->rawgrade : '-';
             $temp['sections'][$i]->grade_item = (is_object($grade)) ? explode('.',$grade->rawgrade)[0] : 0;
             // echo '<pre>';
