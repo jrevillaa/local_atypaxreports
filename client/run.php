@@ -56,7 +56,7 @@ global $DB;
             $temp['sections'][$i]->name_item = $grade_item[$i]->itemname;
 
           }
-          $data[$key]->tmp = $temp;
+          $data[$key]->course = $temp;
           if(in_array('-',$grades_temp)){
             $data[$key]->avance = 'En proceso';
           }else{
