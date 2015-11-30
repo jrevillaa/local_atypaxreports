@@ -46,8 +46,8 @@ global $DB;
           );
           for($i=0;$i<count($course_sections);$i++) {
             $grade = $DB->get_record('grade_grades',array('itemid'=>$grade_item[$i]->id, 'userid' => $value->id),'rawgrade');
-            $temp['sections'][$i]->grade_item = (is_object($grade)) ? explode('.',$grade->rawgrade)[0] : 0;
             $grades_temp[] = (is_object($grade)) ? $grade->rawgrade : '-';
+            $temp['sections'][$i]->grade_item = (is_object($grade)) ? explode('.',$grade->rawgrade)[0] : 0;
             // echo '<pre>';
             // print_r(gettype($grade));
             // print_r('=>');
