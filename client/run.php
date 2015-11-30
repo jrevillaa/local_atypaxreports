@@ -2,37 +2,12 @@
 
 
 require_once(dirname(dirname(dirname(dirname(__FILE__)))) . '/config.php');
-//require_once('prepare_statements.php');
+
 
 global $CFG;
 global $DB;
 
-/*$token = (isset($_GET['token']))?$_GET['token']:'';
-$obj = $DB->get_record('config',array('name'=>'atypaxreportstoken'));
 
-    if($obj->value == $token){
-        $objData = new PrepareData();
-        header('Content-Type: text/plain');
-        print_r($objData->send_data());
-    }else{
-        print_r('invalid token');
-    }
-    */
-   /*
-   SELECT mdl_course.fullname, mdl_user.username, mdl_user.firstname, mdl_user.lastname FROM mdl_course
-
-INNER JOIN mdl_context ON mdl_context.instanceid = mdl_course.id
-
-INNER JOIN mdl_role_assignments ON mdl_context.id = mdl_role_assignments.contextid
-
-INNER JOIN mdl_role ON mdl_role.id = mdl_role_assignments.roleid
-
-INNER JOIN mdl_user ON mdl_user.id = mdl_role_assignments.userid
-
-WHERE mdl_role.id = 5 AND mdl_course.id = 2
-    */
-   //Este Select te devuelve todos los usuarios de un curso en específico
-   //
 
       //echo date('Y-m-d H:i:s',1447885732);
       $idcourse = $_GET['idcourse'];
@@ -56,31 +31,50 @@ WHERE mdl_role.id = 5 AND mdl_course.id = 2
         $todo = array(
               'course'=> $course
         );
-        $course_sections = orderRecords($DB->get_records('course_sections',array('course' => $course->id),'','id,name'));
         $grade_item = orderRecords($DB->get_records('grade_items',array('courseid' => $course->id),'iteminstance','id,itemname'));
 
-        $todo['sections'] = $course_sections;
+        //$todo['sections'] = $course_sections;
         foreach ($data as $key => $value) {
-          $temp = $todo;
+          $grades_temp = array();
+        $course_sections = orderRecords($DB->get_records('course_sections',array('course' => $course->id),'','name'));
+          /*echo '<pre>';
+          print_r($todo);
+          echo '</pre>';*/
+          $temp = array(
+              'course' => $course,
+              'sections' => $course_sections,
+          );
           for($i=0;$i<count($course_sections);$i++) {
-            $grade = $DB->get_record('grade_grades',array('itemid'=>$grade_item[$i]->id, 'userid' => $value->id),'id,rawgrade');
+            $grade = $DB->get_record('grade_grades',array('itemid'=>$grade_item[$i]->id, 'userid' => $value->id),'rawgrade');
+            $temp['sections'][$i]->grade_item = (is_object($grade)) ? explode('.',$grade->rawgrade)[0] : 0;
+            $grades_temp[] = (is_object($grade)) ? $grade->rawgrade : '-';
+            // echo '<pre>';
+            // print_r(gettype($grade));
+            // print_r('=>');
+            // print_r((is_object($grade)) ? $grade->rawgrade : 0);
+            // echo '</pre>';
             $temp['sections'][$i]->name_item = $grade_item[$i]->itemname;
-            $temp['sections'][$i]->grade_item = (is_object($grade))?$grade->rawgrade:0;
+
           }
-          $value->course = $temp;
+          $data[$key]->tmp = $temp;
+          if(in_array('-',$grades_temp)){
+            $data[$key]->avance = 'En proceso';
+          }else{
+            $data[$key]->estado = 'Finalizado';
+          }
         }
+          //echo '<pre>';
+          header('Content-type: text/html; charset=UTF-8');
+          echo json_encode($data);
+          //print_r($data);
+          //echo '</pre>';
+
+
+
         function orderRecords($record){
-          $temp = array();
+          $_temp = array();
           foreach ($record as $key => $value) {
-            $temp[] = $value;
+            $_temp[] = $value;
           }
-          return $temp;
+          return $_temp;
         }
-
-
-
-//echo '<pre>';
-//print_r($data);
-//echo '</pre>';
-header('Content-type: text/html; charset=UTF-8');
-echo json_encode($data);
