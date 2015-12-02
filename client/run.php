@@ -58,7 +58,9 @@ global $DB;
           }
           $data[$key]->course = $temp;
           if(in_array('-',$grades_temp)){
-            $data[$key]->avance = 'En proceso';
+            foreach ($grades_temp as $v) {
+                 ($v != '-') ? $data[$key]->avance = 'En proceso' : $data[$key]->avance = 'Sin iniciar';
+            }
           }else{
             $data[$key]->estado = 'Finalizado';
           }
