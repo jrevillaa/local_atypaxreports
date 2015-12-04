@@ -144,10 +144,10 @@ foreach ($modules as $module) {
     $instances = array();
     foreach ($modinfo->instances[$module->name] as $cm) {
 
-        $instances[$cm->id] = $cm->name;
+        //$instances[$cm->id] = $cm->name;
+        $instanceoptions[$cm->id] = $cm->name;
     }
 
-    $instanceoptions[] = $instances;
 }
 
 echo "<pre>";
