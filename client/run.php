@@ -38,10 +38,10 @@ foreach ($modules as $module) {
     }
 
 }
-
+/*
 echo "<pre>";
 print_r($instanceoptions);
-echo "</pre>";
+echo "</pre>";*/
 
 /******************************************************************************************************/
 
@@ -52,11 +52,11 @@ $actionoptions = report_participation_get_action_options();
 
 $logtable = report_participation_get_log_table_name();
 
-if (!empty($instanceid) && !empty($roleid)) {
+if (!empty($roleid)) {
 
     list($relatedctxsql, $params) = $DB->get_in_or_equal($context->get_parent_context_ids(true), SQL_PARAMS_NAMED, 'relatedctx');
     $params['roleid'] = $roleid;
-    $params['instanceid'] = $instanceid;
+    $params['instanceid'] = array_keys($instanceoptions)[0];
     $params['timefrom'] = $timefrom;
 
         list($crudsql, $crudparams) = report_participation_get_crud_sql($action);
@@ -157,9 +157,13 @@ if (!empty($instanceid) && !empty($roleid)) {
         }
 
 
-      echo "<pre>";
+    /*  echo "<pre>";
       print_r($users);
-      echo "</pre>";
+      echo "</pre>";*/
+
+
+      echo json_encode($users);
+
 
 
 
