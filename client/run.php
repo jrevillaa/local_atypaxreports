@@ -38,10 +38,10 @@ foreach ($modules as $module) {
     }
 
 }
-/*
+
 echo "<pre>";
 print_r($instanceoptions);
-echo "</pre>";*/
+echo "</pre>";
 
 /******************************************************************************************************/
 
@@ -157,12 +157,12 @@ if (!empty($roleid)) {
         }
 
 
-    /*  echo "<pre>";
+      echo "<pre>";
       print_r($users);
-      echo "</pre>";*/
+      echo "</pre>";
 
 
-      echo json_encode($users);
+      //echo json_encode($users);
 
 
 
