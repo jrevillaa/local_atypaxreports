@@ -183,12 +183,12 @@ if (!empty($roleid)) {
         }
 
 
-      echo "<pre>";
+      /*echo "<pre>";
       print_r($users);
-      echo "</pre>";
+      echo "</pre>";*/
 
 
-      //echo json_encode($users);
+      echo json_encode($users);
 
 
 
