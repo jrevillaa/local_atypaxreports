@@ -34,6 +34,16 @@ foreach ($modules as $module) {
 
     $instances = array();
     foreach ($modinfo->instances[$module->name] as $cm) {
+      /*echo "<pre>";
+      print_r(strrpos($cm->name, "Encuesta"));
+      echo "</pre>";*/
+            /*echo "<pre>";
+            //print_r($cm->name);
+            print_r(strrpos($cm->name, "cuesta"));
+            echo "</pre>";*/
+        if( !empty(strrpos($cm->name, "cuesta")) ){
+          $instanceoptions[$cm->id] = $cm->name;
+        }
         if($DB->record_exists('grade_items', array('courseid' => $id , 'itemname' => $cm->name))){
           $instanceoptions[$cm->id] = $cm->name;
         }
@@ -41,12 +51,11 @@ foreach ($modules as $module) {
 
 }
 
-echo "<pre>";
+/*echo "<pre>";
 print_r($instanceoptions);
-echo "</pre>";
+echo "</pre>";*/
 
 /******************************************************************************************************/
-
 
 $context = context_course::instance($course->id);
 
@@ -159,12 +168,12 @@ if (!empty($roleid)) {
         }
 
 
-      echo "<pre>";
+      /*echo "<pre>";
       print_r($users);
-      echo "</pre>";
+      echo "</pre>";*/
 
 
-      //echo json_encode($users);
+      echo json_encode($users);
 
 
 
