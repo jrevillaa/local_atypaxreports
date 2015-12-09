@@ -94,7 +94,14 @@ if (!empty($roleid)) {
         $sql .= $groupbysql;
 
         $users = $DB->get_records_sql($sql, $params);
-
+        $tmpo = array();
+        foreach ($users as $key => $value) {
+          $tmpo[] = $value;
+        }
+        $users = $tmpo;
+        /*echo "<pre>";
+        print_r($users);
+        echo "</pre>";*/
         $temp = 0;
         foreach ($instanceoptions as $key => $value) {
           $params['instanceid'] = $key;
@@ -117,13 +124,22 @@ if (!empty($roleid)) {
           $sql .= $groupbysql;
 
           $notes = $DB->get_records_sql($sql, $params);
+          $tmpo = array();
+          foreach ($notes as $y => $ue) {
+            $tmpo[] = $ue;
+          }
+          $notes = $tmpo;
+          /*echo "<pre>";
+          print_r($notes);
+          echo "</pre>";*/
+
           $count = array();
           foreach ($notes as $k => $v) {
             $users[$k]->count[$temp]['ingreso_actividad'] = ($notes[$k]->count>0) ? 'Si': 'No';
             $users[$k]->count[$temp]['nombre_actividad'] = $value;
             $tm = $DB->get_record('grade_items',array('courseid'=>$course->id,'itemname'=> $value),'id,itemname');
             if(is_object($tm)){
-                $tg = $DB->get_record('grade_grades',array('itemid' => $tm->id,'userid' => $k),'rawgrade');
+                $tg = $DB->get_record('grade_grades',array('itemid' => $tm->id,'userid' => $v->userid),'rawgrade');
                 if(is_object($tg)){
                   $users[$k]->count[$temp]['nota_actividad'] = $tg->rawgrade;
                   $count[$temp] = $tg->rawgrade;
@@ -143,7 +159,6 @@ if (!empty($roleid)) {
 
         foreach ($users as $ke => $va) {
           $rsm = array();
-
           foreach ($va->count as $kie => $alue) {
               $rsm[$kie] = $alue['nota_actividad'];
           }
