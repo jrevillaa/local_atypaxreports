@@ -137,8 +137,9 @@ if (!empty($roleid)) {
           foreach ($notes as $k => $v) {
             $users[$k]->count[$temp]['ingreso_actividad'] = ($notes[$k]->count>0) ? 'Si': 'No';
             $users[$k]->count[$temp]['nombre_actividad'] = $value;
-            $tm = $DB->get_record('grade_items',array('courseid'=>$course->id,'itemname'=> $value),'id,itemname');
+            $tm = $DB->get_record('grade_items',array('courseid'=>$course->id,'itemname'=> $value),'id,itemname,gradepass');
             if(is_object($tm)){
+                $users[$k]->count[$temp]['nota_aprobatoria'] = $tm->gradepass;
                 $tg = $DB->get_record('grade_grades',array('itemid' => $tm->id,'userid' => $v->userid),'rawgrade');
                 if(is_object($tg)){
                   $users[$k]->count[$temp]['nota_actividad'] = $tg->rawgrade;
