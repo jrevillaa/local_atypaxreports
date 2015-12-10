@@ -9,6 +9,8 @@ require_once($CFG->dirroot.'/report/participation/locallib.php');
 $id         = required_param('id', PARAM_INT);
 $roleid     = 5;
 $instanceid = optional_param('instanceid', 0, PARAM_INT);
+//$groupname  = optional_param('grupo',PARAM_ALPHANUMEXT);
+$groupname  = (isset($_GET['grupo'])) ? $_GET['grupo'] : null;
 $timefrom   = 0;
 $action     = 'view';
 
@@ -73,11 +75,19 @@ if (!empty($roleid)) {
         list($crudsql, $crudparams) = report_participation_get_crud_sql($action);
         $params = array_merge($params, $crudparams);
 
+        $ex_groups = ($groupname != null) ? $DB->get_record( "groups" , array( 'courseid' => $course->id , 'name' =>  $groupname ) ) : null;
+        if(is_object($ex_groups)){
+          $sqlgroups = " JOIN {groups_members} gm ON (gm.userid = u.id AND gm.groupid = " . $ex_groups->id . ") ";
+        }else{
+          $sqlgroups = "";
+        }
+
     $users = array();
 
         $sql = "SELECT ra.userid, u.firstname, u.lastname, u.email
                   FROM {user} u
                   JOIN {role_assignments} ra ON u.id = ra.userid AND ra.contextid $relatedctxsql AND ra.roleid = :roleid
+                  $sqlgroups
                   LEFT JOIN {" . $logtable . "} l
                      ON l.contextinstanceid = :instanceid
                        AND l.timecreated > :timefrom" . $crudsql ."
@@ -102,12 +112,14 @@ if (!empty($roleid)) {
         /*echo "<pre>";
         print_r($users);
         echo "</pre>";*/
+
         $temp = 0;
         foreach ($instanceoptions as $key => $value) {
           $params['instanceid'] = $key;
           $sql = "SELECT ra.userid, COUNT(DISTINCT l.timecreated) AS count
                     FROM {user} u
                     JOIN {role_assignments} ra ON u.id = ra.userid AND ra.contextid $relatedctxsql AND ra.roleid = :roleid
+                    $sqlgroups
                     LEFT JOIN {" . $logtable . "} l
                        ON l.contextinstanceid = :instanceid
                          AND l.timecreated > :timefrom" . $crudsql ."
