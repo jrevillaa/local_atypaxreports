@@ -139,17 +139,23 @@ if (!empty($roleid)) {
             $users[$k]->count[$temp]['nombre_actividad'] = $value;
             $tm = $DB->get_record('grade_items',array('courseid'=>$course->id,'itemname'=> $value),'id,itemname,gradepass');
             if(is_object($tm)){
-                $users[$k]->count[$temp]['nota_aprobatoria'] = $tm->gradepass;
                 $tg = $DB->get_record('grade_grades',array('itemid' => $tm->id,'userid' => $v->userid),'rawgrade');
                 if(is_object($tg)){
+                  $users[$k]->count[$temp]['tipo_actividad'] = 'calificada';
                   $users[$k]->count[$temp]['nota_actividad'] = $tg->rawgrade;
                   $count[$temp] = $tg->rawgrade;
                 }else{
+                  $users[$k]->count[$temp]['tipo_actividad'] = 'calificada';
                   $users[$k]->count[$temp]['nota_actividad'] = '-';
                   $count[$temp] = '-';
                 }
+                $users[$k]->count[$temp]['nota_aprobatoria'] = $tm->gradepass;
             }else{
+              if( !empty(strrpos($value, "cuesta")) ){
+                $users[$k]->count[$temp]['tipo_actividad'] = 'dirigida';
+              }else{
                 $users[$k]->count[$temp]['nota_actividad'] = '-';
+              }
                 $count[$temp] = '-';
             }
 
@@ -161,7 +167,9 @@ if (!empty($roleid)) {
         foreach ($users as $ke => $va) {
           $rsm = array();
           foreach ($va->count as $kie => $alue) {
-              $rsm[$kie] = $alue['nota_actividad'];
+              if( empty(strrpos($alue['nombre_actividad'], "cuesta")) ){
+                  $rsm[$kie] = $alue['nota_actividad'];
+              }
           }
 
           if(in_array('-', $rsm)){
