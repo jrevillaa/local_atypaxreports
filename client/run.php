@@ -279,7 +279,7 @@ if (!$onlyuselegacyreader && empty($logtable)) {
 
 $modinfo = get_fast_modinfo($course);
 
-$minloginternalreader = 0; // Time of first record in sql_internal_table_reader.
+$minloginternalreader = 0; 
 
 if ($onlyuselegacyreader) {
     // If no sql_inrenal_reader enabled then get min. time from log table.
