@@ -400,7 +400,7 @@ if (!empty($instanceid) && !empty($roleid)) {
         $matchcount = $totalcount;
     }
 
-    $modulename = get_string('modulename', $cm->modname);
+    //$modulename = get_string('modulename', $cm->modname);
     //echo '<div id="participationreport">' . "\n";
     //echo '<p class="modulename">' . $modulename . ' ' . $strviews . '<br />'."\n"
         //. $modulename . ' ' . $strposts . '</p>'."\n";
