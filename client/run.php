@@ -233,7 +233,7 @@ if ($action != 'view' and $action != 'post') {
 }
 
 if (!$course = $DB->get_record('course', array('id'=>$id))) {
-    print_error('invalidcourse');
+    //print_error('invalidcourse');
 }
 
 if ($roleid != 0 and !$role = $DB->get_record('role', array('id'=>$roleid))) {
@@ -267,14 +267,7 @@ if (empty($logtable)) {
     $onlyuselegacyreader = true;
 }
 
-// If no legacy and no logtable then don't proceed.
-if (!$onlyuselegacyreader && empty($logtable)) {
-    echo $OUTPUT->box_start('generalbox', 'notice');
-    echo get_string('nologreaderenabled', 'report_participation');
-    echo $OUTPUT->box_end();
-    echo $OUTPUT->footer();
-    die();
-}
+
 
 $modinfo = get_fast_modinfo($course);
 
@@ -306,15 +299,7 @@ if ($onlyuselegacyreader) {
 // Print first controls.
 //report_participation_print_filter_form($course, $timefrom, $minlog, $action, $roleid, $instanceid);
 
-$baseurl = new moodle_url('/report/participation/index.php', array(
-    'id' => $course->id,
-    'roleid' => $roleid,
-    'instanceid' => $instanceid,
-    'timefrom' => $timefrom,
-    'action' => $action,
-    'perpage' => $perpage,
-    'group' => $currentgroup
-));
+
 //$select = groups_allgroups_course_menu($course, $baseurl, true, $currentgroup);
 
 // User cannot see any group.
@@ -326,11 +311,6 @@ $currentgroup = $SESSION->activegroup[$course->id][$groupmode][$course->defaultg
 
 if (!empty($instanceid) && !empty($roleid)) {
 
-    // Trigger a report viewed event.
-    $event = \report_participation\event\report_viewed::create(array('context' => $context,
-            'other' => array('instanceid' => $instanceid, 'groupid' => $currentgroup, 'roleid' => $roleid,
-            'timefrom' => $timefrom, 'action' => $action)));
-    $event->trigger();
 
     // from here assume we have at least the module we're using.
     $cm = $modinfo->cms[$instanceid];
@@ -342,35 +322,14 @@ if (!empty($instanceid) && !empty($roleid)) {
         exit;
     }
 
-    $table = new flexible_table('course-participation-'.$course->id.'-'.$cm->id.'-'.$roleid);
-    $table->course = $course;
 
     $actionheader = !empty($action) ? get_string($action) : get_string('allactions');
 
-    if (empty($CFG->messaging)) {
-        $table->define_columns(array('fullname', 'count'));
-        $table->define_headers(array(get_string('user'), $actionheader));
-    } else {
-        $table->define_columns(array('fullname', 'count', 'select'));
-        $table->define_headers(array(get_string('user'), $actionheader, get_string('select')));
-    }
-    $table->define_baseurl($baseurl);
 
-    $table->set_attribute('cellpadding','5');
-    $table->set_attribute('class', 'generaltable generalbox reporttable');
 
-    $table->sortable(true,'lastname','ASC');
-    $table->no_sorting('select');
 
-    $table->set_control_variables(array(
-                                        TABLE_VAR_SORT    => 'ssort',
-                                        TABLE_VAR_HIDE    => 'shide',
-                                        TABLE_VAR_SHOW    => 'sshow',
-                                        TABLE_VAR_IFIRST  => 'sifirst',
-                                        TABLE_VAR_ILAST   => 'silast',
-                                        TABLE_VAR_PAGE    => 'spage'
-                                        ));
-    $table->setup();
+
+    //$table->setup();
 
     // We want to query both the current context and parent contexts.
     list($relatedctxsql, $params) = $DB->get_in_or_equal($context->get_parent_context_ids(true), SQL_PARAMS_NAMED, 'relatedctx');
@@ -392,21 +351,18 @@ if (!empty($instanceid) && !empty($roleid)) {
 
     $totalcount = $DB->count_records_sql($countsql, $params);
 
-    list($twhere, $tparams) = $table->get_sql_where();
-    if ($twhere) {
-        $params = array_merge($params, $tparams);
-        $matchcount = $DB->count_records_sql($countsql.' AND '.$twhere, $params);
-    } else {
+    //list($twhere, $tparams) = $table->get_sql_where();
+
+    echo "<pre>";
+    print_r($totalcount);
+    echo "</pre>";
+
         $matchcount = $totalcount;
-    }
 
-    //$modulename = get_string('modulename', $cm->modname);
-    //echo '<div id="participationreport">' . "\n";
-    //echo '<p class="modulename">' . $modulename . ' ' . $strviews . '<br />'."\n"
-        //. $modulename . ' ' . $strposts . '</p>'."\n";
 
-    $table->initialbars($totalcount > $perpage);
-    $table->pagesize($perpage, $matchcount);
+
+    //$table->initialbars($totalcount > $perpage);
+    //$table->pagesize($perpage, $matchcount);
 
     if ($uselegacyreader || $onlyuselegacyreader) {
         list($actionsql, $actionparams) = report_participation_get_action_sql($action, $cm->modname);
@@ -441,10 +397,8 @@ if (!empty($instanceid) && !empty($roleid)) {
             $sql .= ' WHERE '.$twhere; // Initial bar.
         }
 
-        if ($table->get_sql_sort()) {
-            $sql .= ' ORDER BY '.$table->get_sql_sort();
-        }
-        if (!$users = $DB->get_records_sql($sql, $params, $table->get_page_start(), $table->get_page_size())) {
+
+        if (!$users = $DB->get_records_sql($sql, $params)) {
             $users = array(); // Tablelib will handle saying 'Nothing to display' for us.
         }
     }
@@ -469,15 +423,11 @@ if (!empty($instanceid) && !empty($roleid)) {
         $params['edulevel'] = core\event\base::LEVEL_PARTICIPATING;
         $params['contextlevel'] = CONTEXT_MODULE;
 
-        if ($twhere) {
-            $sql .= ' WHERE '.$twhere; // Initial bar.
-        }
+
         $sql .= $groupbysql;
 
-        if ($table->get_sql_sort()) {
-            $sql .= ' ORDER BY '.$table->get_sql_sort();
-        }
-        if ($u = $DB->get_records_sql($sql, $params, $table->get_page_start(), $table->get_page_size())) {
+
+        if ($u = $DB->get_records_sql($sql, $params)) {
             if (empty($users)) {
                 $users = $u;
             } else {
@@ -497,69 +447,10 @@ if (!empty($instanceid) && !empty($roleid)) {
         }
     }
 
-    $data = array();
 
-    $a = new stdClass();
-    $a->count = $totalcount;
-    $a->items = $role->name;
+    echo "<pre>";
+    print_r($users);
+    echo "</pre>";
 
-    if ($matchcount != $totalcount) {
-        $a->count = $matchcount.'/'.$a->count;
-    }
 
-    /*echo '<h2>'.get_string('counteditems', '', $a).'</h2>'."\n";
-
-    echo '<form action="'.$CFG->wwwroot.'/user/action_redir.php" method="post" id="studentsform">'."\n";
-    echo '<div>'."\n";
-    echo '<input type="hidden" name="id" value="'.$id.'" />'."\n";
-    echo '<input type="hidden" name="returnto" value="'. s($PAGE->url) .'" />'."\n";
-    echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />'."\n"*/;
-
-    foreach ($users as $u) {
-        $data = array();
-        $data[] = html_writer::link(new moodle_url('/user/view.php', array('id' => $u->userid, 'course' => $course->id)),
-            fullname($u, true));
-        $data[] = !empty($u->count) ? get_string('yes').' ('.$u->count.') ' : get_string('no');
-
-        if (!empty($CFG->messaging)) {
-            $data[] = '<input type="checkbox" class="usercheckbox" name="user'.$u->userid.'" value="'.$u->count.'" />';
-        }
-        $table->add_data($data);
-    }
-
-    $table->print_html();
-
-    /*if ($perpage == SHOW_ALL_PAGE_SIZE) {
-        $perpageurl = new moodle_url($baseurl, array('perpage' => DEFAULT_PAGE_SIZE));
-        echo html_writer::start_div('', array('id' => 'showall'));
-        echo html_writer::link($perpageurl, get_string('showperpage', '', DEFAULT_PAGE_SIZE));
-        echo html_writer::end_div();
-    } else if ($matchcount > 0 && $perpage < $matchcount) {
-        $perpageurl = new moodle_url($baseurl, array('perpage' => SHOW_ALL_PAGE_SIZE));
-        echo html_writer::start_div('', array('id' => 'showall'));
-        echo html_writer::link($perpageurl, get_string('showall', '', $matchcount));
-        echo html_writer::end_div();
-    }*/
-
-    /*if (!empty($CFG->messaging)) {
-        echo '<div class="selectbuttons">';
-        echo '<input type="button" id="checkall" value="'.get_string('selectall').'" /> '."\n";
-        echo '<input type="button" id="checknone" value="'.get_string('deselectall').'" /> '."\n";
-        if ($perpage >= $matchcount) {
-            echo '<input type="button" id="checknos" value="'.get_string('selectnos').'" />'."\n";
-        }
-        echo '</div>';
-        echo '<div>';
-        echo html_writer::label(get_string('withselectedusers'), 'formactionselect');
-        $displaylist['messageselect.php'] = get_string('messageselectadd');
-        echo html_writer::select($displaylist, 'formaction', '', array('' => 'choosedots'), array('id' => 'formactionselect'));
-        echo $OUTPUT->help_icon('withselectedusers');
-        echo '<input type="submit" value="' . get_string('ok') . '" />'."\n";
-        echo '</div>';
-        echo '</div>'."\n";
-        echo '</form>'."\n";
-        echo '</div>'."\n";
-
-        $PAGE->requires->js_init_call('M.report_participation.init');
-    }*/
 }
