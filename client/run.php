@@ -135,7 +135,7 @@ if (!empty($roleid)) {
           foreach ($notes as $k => $v) {
             $users[$k]->count[$temp]['ingreso_actividad'] = ($notes[$k]->count>0) ? 'Si': 'No';
             $users[$k]->count[$temp]['nombre_actividad'] = $value;
-            $tm = $DB->get_record('grade_items',array('courseid'=>$course->id,'itemname'=> $value),'id,itemname,gradepass');
+            $tm = $DB->get_record('grade_items',array('courseid'=>$course->id,'itemname'=> $value),'id,itemname,itemtype,gradepass');
             if(is_object($tm)){
                 $tg = $DB->get_record('grade_grades',array('itemid' => $tm->id,'userid' => $v->userid),'rawgrade');
                 if(is_object($tg)){
@@ -147,6 +147,7 @@ if (!empty($roleid)) {
                   $users[$k]->count[$temp]['nota_actividad'] = '-';
                   $count[$temp] = '-';
                 }
+                $users[$k]->count[$temp]['tipo_actividad'] = ($tm->itemtype == 'scorm') ? 'scorm':'calificada';
                 $users[$k]->count[$temp]['nota_aprobatoria'] = $tm->gradepass;
             }else{
               if( !empty(strrpos($value, "cuesta")) ){
