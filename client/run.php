@@ -5,12 +5,12 @@ require_once(dirname(dirname(dirname(dirname(__FILE__)))) . '/config.php');
 
 require_once($CFG->dirroot.'/report/participation/locallib.php');
 
-/*$id         = required_param('id', PARAM_INT);
+$id         = required_param('id', PARAM_INT);
 $roleid     = 5;
 $instanceid = optional_param('instanceid', 0, PARAM_INT);
 $groupname  = (isset($_GET['grupo'])) ? $_GET['grupo'] : null;
 $timefrom   = 0;
-$action     = 'view';
+$action     = '';
 
 $course = $DB->get_record('course', array('id'=>$id));
 
@@ -190,9 +190,9 @@ if (!empty($roleid)) {
         }
 
 
-      //echo "<pre>";
-      //print_r($users);
-      //echo "</pre>";
+      /*echo "<pre>";
+      print_r($users);
+      echo "</pre>";*/
 
 
       echo json_encode($users);
@@ -200,9 +200,9 @@ if (!empty($roleid)) {
 
 
 
-}*/
+}
 
-
+/*
 
 require_once($CFG->dirroot.'/lib/tablelib.php');
 require_once($CFG->dirroot.'/report/participation/locallib.php');
@@ -211,34 +211,21 @@ define('DEFAULT_PAGE_SIZE', 20);
 define('SHOW_ALL_PAGE_SIZE', 5000);
 
 $id         = required_param('id', PARAM_INT); // course id.
-$roleid     = optional_param('roleid', 0, PARAM_INT); // which role to show
+$roleid     = 5; // which role to show
 $instanceid = optional_param('instanceid', 0, PARAM_INT); // instance we're looking at.
-$timefrom   = optional_param('timefrom', 0, PARAM_INT); // how far back to look...
-$action     = optional_param('action', '', PARAM_ALPHA);
-$page       = optional_param('page', 0, PARAM_INT);                     // which page to show
-$perpage    = optional_param('perpage', SHOW_ALL_PAGE_SIZE, PARAM_INT);  // how many per page
+$timefrom   = 0; // how far back to look...
+$action     = '';
+$perpage    = 50000;  // how many per page
 $currentgroup = optional_param('group', null, PARAM_INT); // Get the active group.
 
-$url = new moodle_url('/report/participation/index.php', array('id'=>$id));
-if ($roleid !== 0) $url->param('roleid');
-if ($instanceid !== 0) $url->param('instanceid');
-if ($timefrom !== 0) $url->param('timefrom');
-if ($action !== '') $url->param('action');
-if ($page !== 0) $url->param('page');
-if ($perpage !== DEFAULT_PAGE_SIZE) $url->param('perpage');
-$PAGE->set_url($url);
 
-if ($action != 'view' and $action != 'post') {
-    $action = ''; // default to all (don't restrict)
-}
 
-if (!$course = $DB->get_record('course', array('id'=>$id))) {
-    //print_error('invalidcourse');
-}
 
-if ($roleid != 0 and !$role = $DB->get_record('role', array('id'=>$roleid))) {
-    //print_error('invalidrole');
-}
+$course = $DB->get_record('course', array('id'=>$id));
+
+$role = $DB->get_record('role', array('id'=>$roleid));
+
+
 
 
 $context = context_course::instance($course->id);
@@ -453,4 +440,4 @@ if (!empty($instanceid) && !empty($roleid)) {
     echo "</pre>";
 
 
-}
+}*/
