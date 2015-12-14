@@ -203,6 +203,7 @@ if (!empty($roleid)) {
 }*/
 
 
+
 require_once($CFG->dirroot.'/lib/tablelib.php');
 require_once($CFG->dirroot.'/report/participation/locallib.php');
 
@@ -210,16 +211,27 @@ define('DEFAULT_PAGE_SIZE', 20);
 define('SHOW_ALL_PAGE_SIZE', 5000);
 
 $id         = required_param('id', PARAM_INT); // course id.
-$roleid     = 5; // which role to show
+$roleid     = optional_param('roleid', 0, PARAM_INT); // which role to show
 $instanceid = optional_param('instanceid', 0, PARAM_INT); // instance we're looking at.
-$timefrom   = 0; // how far back to look...
-$action     = 'view';
-$perpage    = 5000;  // how many per page
+$timefrom   = optional_param('timefrom', 0, PARAM_INT); // how far back to look...
+$action     = optional_param('action', '', PARAM_ALPHA);
+$page       = optional_param('page', 0, PARAM_INT);                     // which page to show
+$perpage    = optional_param('perpage', DEFAULT_PAGE_SIZE, PARAM_INT);  // how many per page
 $currentgroup = optional_param('group', null, PARAM_INT); // Get the active group.
 
+$url = new moodle_url('/report/participation/index.php', array('id'=>$id));
+if ($roleid !== 0) $url->param('roleid');
+if ($instanceid !== 0) $url->param('instanceid');
+if ($timefrom !== 0) $url->param('timefrom');
+if ($action !== '') $url->param('action');
+if ($page !== 0) $url->param('page');
+if ($perpage !== DEFAULT_PAGE_SIZE) $url->param('perpage');
+$PAGE->set_url($url);
+$PAGE->set_pagelayout('admin');
 
-
-
+if ($action != 'view' and $action != 'post') {
+    $action = ''; // default to all (don't restrict)
+}
 
 if (!$course = $DB->get_record('course', array('id'=>$id))) {
     print_error('invalidcourse');
@@ -243,7 +255,9 @@ if (!array_key_exists($action, $actionoptions)) {
     $action = '';
 }
 
-
+$PAGE->set_title($course->shortname .': '. $strparticipation);
+$PAGE->set_heading($course->fullname);
+echo $OUTPUT->header();
 
 $uselegacyreader = false; // Use legacy reader with sql_internal_table_reader to aggregate records.
 $onlyuselegacyreader = false; // Use only legacy log table to aggregate records.
@@ -255,11 +269,18 @@ if (empty($logtable)) {
     $onlyuselegacyreader = true;
 }
 
-
+// If no legacy and no logtable then don't proceed.
+if (!$onlyuselegacyreader && empty($logtable)) {
+    echo $OUTPUT->box_start('generalbox', 'notice');
+    echo get_string('nologreaderenabled', 'report_participation');
+    echo $OUTPUT->box_end();
+    echo $OUTPUT->footer();
+    die();
+}
 
 $modinfo = get_fast_modinfo($course);
 
-$minloginternalreader = 0;
+$minloginternalreader = 0; // Time of first record in sql_internal_table_reader.
 
 if ($onlyuselegacyreader) {
     // If no sql_inrenal_reader enabled then get min. time from log table.
@@ -284,6 +305,8 @@ if ($onlyuselegacyreader) {
     }
 }
 
+// Print first controls.
+report_participation_print_filter_form($course, $timefrom, $minlog, $action, $roleid, $instanceid);
 
 $baseurl = new moodle_url('/report/participation/index.php', array(
     'id' => $course->id,
@@ -296,7 +319,14 @@ $baseurl = new moodle_url('/report/participation/index.php', array(
 ));
 $select = groups_allgroups_course_menu($course, $baseurl, true, $currentgroup);
 
-
+// User cannot see any group.
+if (empty($select)) {
+    echo $OUTPUT->heading(get_string("notingroup"));
+    echo $OUTPUT->footer();
+    exit;
+} else {
+    echo $select;
+}
 
 // Fetch current active group.
 $groupmode = groups_get_course_groupmode($course);
@@ -313,7 +343,12 @@ if (!empty($instanceid) && !empty($roleid)) {
     // from here assume we have at least the module we're using.
     $cm = $modinfo->cms[$instanceid];
 
-
+    // Group security checks.
+    if (!groups_group_visible($currentgroup, $course, $cm)) {
+        echo $OUTPUT->heading(get_string("notingroup"));
+        echo $OUTPUT->footer();
+        exit;
+    }
 
     $table = new flexible_table('course-participation-'.$course->id.'-'.$cm->id.'-'.$roleid);
     $table->course = $course;
@@ -374,7 +409,9 @@ if (!empty($instanceid) && !empty($roleid)) {
     }
 
     $modulename = get_string('modulename', $cm->modname);
-
+    echo '<div id="participationreport">' . "\n";
+    echo '<p class="modulename">' . $modulename . ' ' . $strviews . '<br />'."\n"
+        . $modulename . ' ' . $strposts . '</p>'."\n";
 
     $table->initialbars($totalcount > $perpage);
     $table->pagesize($perpage, $matchcount);
@@ -478,6 +515,14 @@ if (!empty($instanceid) && !empty($roleid)) {
         $a->count = $matchcount.'/'.$a->count;
     }
 
+    echo '<h2>'.get_string('counteditems', '', $a).'</h2>'."\n";
+
+    echo '<form action="'.$CFG->wwwroot.'/user/action_redir.php" method="post" id="studentsform">'."\n";
+    echo '<div>'."\n";
+    echo '<input type="hidden" name="id" value="'.$id.'" />'."\n";
+    echo '<input type="hidden" name="returnto" value="'. s($PAGE->url) .'" />'."\n";
+    echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />'."\n";
+
     foreach ($users as $u) {
         $data = array();
         $data[] = html_writer::link(new moodle_url('/user/view.php', array('id' => $u->userid, 'course' => $course->id)),
@@ -485,13 +530,24 @@ if (!empty($instanceid) && !empty($roleid)) {
         $data[] = !empty($u->count) ? get_string('yes').' ('.$u->count.') ' : get_string('no');
 
         if (!empty($CFG->messaging)) {
-            //$data[] = '<input type="checkbox" class="usercheckbox" name="user'.$u->userid.'" value="'.$u->count.'" />';
+            $data[] = '<input type="checkbox" class="usercheckbox" name="user'.$u->userid.'" value="'.$u->count.'" />';
         }
         $table->add_data($data);
     }
 
     $table->print_html();
 
+    if ($perpage == SHOW_ALL_PAGE_SIZE) {
+        $perpageurl = new moodle_url($baseurl, array('perpage' => DEFAULT_PAGE_SIZE));
+        echo html_writer::start_div('', array('id' => 'showall'));
+        echo html_writer::link($perpageurl, get_string('showperpage', '', DEFAULT_PAGE_SIZE));
+        echo html_writer::end_div();
+    } else if ($matchcount > 0 && $perpage < $matchcount) {
+        $perpageurl = new moodle_url($baseurl, array('perpage' => SHOW_ALL_PAGE_SIZE));
+        echo html_writer::start_div('', array('id' => 'showall'));
+        echo html_writer::link($perpageurl, get_string('showall', '', $matchcount));
+        echo html_writer::end_div();
+    }
 
     if (!empty($CFG->messaging)) {
         echo '<div class="selectbuttons">';
@@ -514,5 +570,6 @@ if (!empty($instanceid) && !empty($roleid)) {
 
         $PAGE->requires->js_init_call('M.report_participation.init');
     }
-
 }
+
+echo $OUTPUT->footer();
