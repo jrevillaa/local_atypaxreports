@@ -254,9 +254,7 @@ if (!array_key_exists($action, $actionoptions)) {
     $action = '';
 }
 
-$PAGE->set_title($course->shortname .': '. $strparticipation);
-$PAGE->set_heading($course->fullname);
-echo $OUTPUT->header();
+
 
 $uselegacyreader = false; // Use legacy reader with sql_internal_table_reader to aggregate records.
 $onlyuselegacyreader = false; // Use only legacy log table to aggregate records.
@@ -268,18 +266,11 @@ if (empty($logtable)) {
     $onlyuselegacyreader = true;
 }
 
-// If no legacy and no logtable then don't proceed.
-if (!$onlyuselegacyreader && empty($logtable)) {
-    echo $OUTPUT->box_start('generalbox', 'notice');
-    echo get_string('nologreaderenabled', 'report_participation');
-    echo $OUTPUT->box_end();
-    echo $OUTPUT->footer();
-    die();
-}
+
 
 $modinfo = get_fast_modinfo($course);
 
-$minloginternalreader = 0; 
+$minloginternalreader = 0;
 
 if ($onlyuselegacyreader) {
     // If no sql_inrenal_reader enabled then get min. time from log table.
@@ -318,14 +309,7 @@ $baseurl = new moodle_url('/report/participation/index.php', array(
 ));
 $select = groups_allgroups_course_menu($course, $baseurl, true, $currentgroup);
 
-// User cannot see any group.
-if (empty($select)) {
-    echo $OUTPUT->heading(get_string("notingroup"));
-    echo $OUTPUT->footer();
-    exit;
-} else {
-    echo $select;
-}
+
 
 // Fetch current active group.
 $groupmode = groups_get_course_groupmode($course);
@@ -570,5 +554,3 @@ if (!empty($instanceid) && !empty($roleid)) {
         $PAGE->requires->js_init_call('M.report_participation.init');
     }
 }
-
-echo $OUTPUT->footer();
