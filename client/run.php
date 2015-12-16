@@ -35,7 +35,7 @@ foreach ($modules as $module) {
     $instances = array();
     foreach ($modinfo->instances[$module->name] as $cm) {
 
-        if( !empty(strrpos($cm->name, "cuesta")) ){
+        if( !empty(strrpos($cm->name, "cuesta de")) ){
           $instanceoptions[$cm->id] = $cm->name;
         }
         if($DB->record_exists('grade_items', array('courseid' => $id , 'itemname' => $cm->name))){
