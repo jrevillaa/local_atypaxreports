@@ -76,7 +76,7 @@ if (!empty($roleid)) {
 
     $users = array();
 
-        $sql = "SELECT ra.userid, u.firstname, u.lastname, u.email
+        $sql = "SELECT ra.userid, u.username, u.firstname, u.lastname, u.email
                   FROM {user} u
                   JOIN {role_assignments} ra ON u.id = ra.userid AND ra.contextid $relatedctxsql AND ra.roleid = :roleid
                   $sqlgroups
